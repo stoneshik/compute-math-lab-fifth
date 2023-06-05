@@ -148,7 +148,10 @@ class GaussMethod(SolutionMethod):
     Класс для интерполяции при помощи многочлена Гаусса
     """
     def __init__(self, initial_data: list) -> None:
-        super().__init__(['i', 'X', 'Y', 'P2(x)=ax^2+bx+c', 'εi'], 'phi = ax^2+bx+c', initial_data)
+        super().__init__(['i', 'li(x)', 'yi', 'li(x)*yi'], 'многочлен Гаусса', initial_data)
+
+    def calc_error(self) -> float:
+        return 1.0
 
     def calc(self, x: float) -> float:
         pass
