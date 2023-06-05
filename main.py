@@ -144,7 +144,6 @@ class LangrangeMethod(SolutionMethod):
         return l_n
 
     def calc_with_output_result(self, x: float) -> PrettyTable:
-        self._check_equidistant_nodes()
         table: PrettyTable = PrettyTable()
         table.field_names = self._field_names_table
         l_n: float = 0.0
