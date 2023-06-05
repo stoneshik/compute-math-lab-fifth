@@ -52,6 +52,7 @@ class TableEndDifference:
         elif n == 1:
             table.field_names = ['i', 'xi', 'yi']
             table.add_row(['0', str(self._initial_data[0][0]), str(self._initial_data[1][0])])
+            return table
         else:
             field_names: list = ['i', 'xi', 'yi', 'Δyi']
             field_names.extend([f"Δ^{i}yi" for i in range(2, n)])
