@@ -60,6 +60,36 @@ class LangrangeMethod(SolutionMethod):
     def __init__(self, initial_data: list) -> None:
         super().__init__(['i', 'li(x)', 'yi', 'li(x)*yi'], 'многочлен Лагранжа', initial_data)
 
+    def calc(self, x: float) -> float:
+        l_n: float = 0.0
+        n: int = len(self._initial_data[0])
+        for i, x_i, y_i in zip(range(n), self._initial_data[0], self._initial_data[1]):
+            l_n_iter: float = 1.0
+            for j, x_j in enumerate(self._initial_data[0]):
+                if i == j:
+                    continue
+                l_n_iter *= (x - x_j) / (x_i - x_j)
+            l_n += y_i * l_n_iter
+        return l_n
+
+    def calc_with_output_result(self, x: float) -> PrettyTable:
+        table: PrettyTable = PrettyTable()
+        table.field_names = self._field_names_table
+        l_n: float = 0.0
+        n: int = len(self._initial_data[0])
+        for i, x_i, y_i in zip(range(n), self._initial_data[0], self._initial_data[1]):
+            l_n_iter: float = 1.0
+            for j, x_j in enumerate(self._initial_data[0]):
+                if i == j:
+                    continue
+                l_n_iter *= (x - x_j) / (x_i - x_j)
+            l_n += y_i * l_n_iter
+            table.add_row([i, l_n_iter, y_i, y_i * l_n_iter])
+            i += 1
+        self._find_solution_x: float = x
+        self._find_solution_y: float = l_n
+        return table
+
 
 class GaussMethod(SolutionMethod):
     """
@@ -67,6 +97,12 @@ class GaussMethod(SolutionMethod):
     """
     def __init__(self, initial_data: list) -> None:
         super().__init__(['i', 'X', 'Y', 'P2(x)=ax^2+bx+c', 'εi'], 'phi = ax^2+bx+c', initial_data)
+
+    def calc(self, x: float) -> float:
+        pass
+
+    def calc_with_output_result(self, x: float) -> PrettyTable:
+        pass
 
 
 def draw(methods: iter, initial_data: list) -> None:
@@ -78,11 +114,11 @@ def draw(methods: iter, initial_data: list) -> None:
     for method in methods:
         y_values = [method.calc(x_iter) for x_iter in x_values]
         try:
-            plt.plot(x_values, y_values, linestyle='--', label=f"${method.name_method}$")
+            plt.plot(x_values, y_values, linestyle='--', label=f"{method.name_method}")
         except TypeError:
             x_values_error = numpy.arange(initial_data[0][0], initial_data[0][-1], 0.01)
             y_values_error = [method.calc(x_iter) for x_iter in x_values_error]
-            plt.plot(x_values_error, y_values_error, linestyle='--', label=f"${method.kind_function}$")
+            plt.plot(x_values_error, y_values_error, linestyle='--', label=f"{method.name_method}")
     plt.legend(loc='upper left')
     x_values = []
     y_values = []
@@ -104,7 +140,7 @@ def main():
     )
     x_value: float = float(input("Введите значение x, для которого нужно вычислить приближённое значение функции\n"))
     for solution_method in solution_methods:
-        print(solution_method.calc(x_value))
+        print(solution_method.calc_with_output_result(x_value))
         print(solution_method.print_result())
     draw(solution_methods, initial_data)
 
