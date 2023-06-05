@@ -25,6 +25,47 @@ class Equation:
         return diff(self.equation_func)
 
 
+class TableEndDifference:
+    """
+    Таблица конечных разностей
+    """
+    def __init__(self, initial_data: list) -> None:
+        self._initial_data: list = initial_data
+        self._table: list = self._create_table()
+
+    @property
+    def table(self) -> list:
+        return self._table
+
+    def _create_table(self) -> list:
+        table: list = [self._initial_data[1]]
+        n: int = len(self._initial_data[1])
+        for i in range(n - 1):
+            table.append([y_i_plus_1 - y_i for y_i, y_i_plus_1 in zip(table[i][:-1], table[i][1:])])
+        return table
+
+    def print_table(self) -> (PrettyTable, None):
+        table: PrettyTable = PrettyTable()
+        n: int = len(self._initial_data[0])
+        if n < 1:
+            return None
+        elif n == 1:
+            table.field_names = ['i', 'xi', 'yi']
+            table.add_row(['0', str(self._initial_data[0][0]), str(self._initial_data[1][0])])
+        else:
+            field_names: list = ['i', 'xi', 'yi', 'Δyi']
+            field_names.extend([f"Δ^{i}yi" for i in range(2, n)])
+            table.field_names = field_names
+        for i, x_i in enumerate(self._initial_data[0]):
+            if n - i > 1:
+                row: list = [i, str(x_i), str(self._table[0][i]), f"Δy{i}={self._table[1][i]}"]
+            else:
+                row: list = [i, str(x_i), str(self._table[0][i]), '-']
+            row.extend([f"Δ^{j}y{i}={self._table[j][i]}" if j < n - i else '-' for j in range(2, n)])
+            table.add_row(row)
+        return table
+
+
 class SolutionMethod(ABC):
     """
     Базовый абстрактный класс для классов реализаций интерполяции
@@ -148,6 +189,10 @@ def main():
         LangrangeMethod(initial_data),
         #GaussMethod(initial_data)
     )
+    table_end_difference: TableEndDifference = TableEndDifference(initial_data)
+    if table_end_difference is None:
+        return
+    print(table_end_difference.print_table())
     x_value: float = float(input("Введите значение x, для которого нужно вычислить приближённое значение функции\n"))
     for solution_method in solution_methods:
         print(solution_method.calc_with_output_result(x_value))
