@@ -98,7 +98,7 @@ class SolutionMethod(ABC):
         pass
 
     @abstractmethod
-    def calc(self, x: float) -> float:
+    def calc(self, x: float) -> (float, None):
         pass
 
     @abstractmethod
@@ -173,7 +173,9 @@ class GaussMethod(SolutionMethod):
     def calc_error(self) -> float:
         return 1.0
 
-    def calc(self, x: float) -> float:
+    def calc(self, x: float) -> (float, None):
+        if not self._check_equidistant_nodes():
+            return None
         pass
 
     def calc_with_output_result(self, x: float) -> (PrettyTable, None):
@@ -229,6 +231,9 @@ def main():
         return
     print(table_end_difference.print_table())
     x_value: float = float(input("Введите значение x, для которого нужно вычислить приближённое значение функции\n"))
+    if not initial_data[0][0] <= x_value <= initial_data[0][-1]:
+        print("Значение x не попадает в заданный интервал")
+        return
     for solution_method in solution_methods:
         result = solution_method.calc_with_output_result(x_value)
         if not solution_method.is_calc or result is None:
