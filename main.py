@@ -5,6 +5,7 @@ import numpy
 import matplotlib
 import matplotlib.pyplot as plt
 from prettytable import PrettyTable
+from sympy import Symbol
 
 from manager_io import InputManager
 
@@ -170,12 +171,17 @@ class GaussMethod(SolutionMethod):
         return table
 
 
-def draw(methods: iter, initial_data: list) -> None:
+def draw(methods: iter, initial_data: list, input_manager: InputManager) -> None:
     plt.figure()
     plt.xlabel(r'$x$', fontsize=14)
     plt.ylabel(r'$y$', fontsize=14)
     plt.title(r'Графики полученных функций')
     x_values = numpy.arange(initial_data[0][0] - 0.2, initial_data[0][-1] + 0.2, 0.01)
+    if input_manager.chosen_function is not None:
+        x_symbol: Symbol = Symbol('x')
+        y_values: list = [
+            input_manager.chosen_function.equation_func.subs(x_symbol, x_iter) for x_iter in x_values]
+        plt.plot(x_values, y_values, color='orange', label="Выбранная функция")
     c: int = 0
     for method in methods:
         if not method.is_calc:
@@ -224,7 +230,7 @@ def main():
             continue
         print(result)
         print(solution_method.print_result())
-    draw(solution_methods, initial_data)
+    draw(solution_methods, initial_data, input_manager)
 
 
 if __name__ == '__main__':

@@ -22,6 +22,10 @@ class InputManager:
         self._file_path: str = ''
         self._chosen_function = None
 
+    @property
+    def chosen_function(self) -> (Equation, None):
+        return self._chosen_function
+
     def input(self) -> (list, None):
         print("Формат входного файла:\nКоличество точек N>0\nКоординаты X и Y через пробел\n")
         while True:
@@ -109,4 +113,5 @@ class InputManager:
             x_value: float = a + h * i
             x_values.append(x_value)
             y_values.append(function.equation_func.subs(x, x_value))
+        self._chosen_function = function
         return [x_values, y_values]
