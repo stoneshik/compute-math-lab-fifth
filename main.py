@@ -102,8 +102,17 @@ class SolutionMethod(ABC):
         pass
 
     @abstractmethod
-    def calc_with_output_result(self, x: float) -> PrettyTable:
+    def calc_with_output_result(self, x: float) -> (PrettyTable, None):
         pass
+
+    def _check_equidistant_nodes(self) -> bool:
+        if len(self._initial_data[0]) < 2:
+            return False
+        h: float = self._initial_data[0][1] - self._initial_data[0][0]
+        for x_i, x_i_plus in zip(self._initial_data[0][1:-1], self._initial_data[0][2:]):
+            if x_i_plus - x_i != h:
+                return False
+        return True
 
     def print_result(self) -> str:
         return f"Для x={self._find_solution_x} было вычисленно значение y={self._find_solution_y}\nПогрешность R={self.calc_error()}"
@@ -135,6 +144,7 @@ class LangrangeMethod(SolutionMethod):
         return l_n
 
     def calc_with_output_result(self, x: float) -> PrettyTable:
+        self._check_equidistant_nodes()
         table: PrettyTable = PrettyTable()
         table.field_names = self._field_names_table
         l_n: float = 0.0
@@ -167,8 +177,12 @@ class GaussMethod(SolutionMethod):
     def calc(self, x: float) -> float:
         pass
 
-    def calc_with_output_result(self, x: float) -> PrettyTable:
-        pass
+    def calc_with_output_result(self, x: float) -> (PrettyTable, None):
+        if not self._check_equidistant_nodes():
+            return None
+        table: PrettyTable = PrettyTable()
+        table.field_names = self._field_names_table
+        return table
 
 
 def draw(methods: iter, initial_data: list) -> None:
@@ -217,9 +231,10 @@ def main():
     print(table_end_difference.print_table())
     x_value: float = float(input("Введите значение x, для которого нужно вычислить приближённое значение функции\n"))
     for solution_method in solution_methods:
-        print(solution_method.calc_with_output_result(x_value))
-        if not solution_method.is_calc:
+        result = solution_method.calc_with_output_result(x_value)
+        if not solution_method.is_calc or result is None:
             continue
+        print(result)
         print(solution_method.print_result())
     draw(solution_methods, initial_data)
 
