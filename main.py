@@ -72,16 +72,26 @@ class SolutionMethod(ABC):
     Базовый абстрактный класс для классов реализаций интерполяции
     """
 
-    def __init__(self, field_names_table: list, name_method: str, initial_data: list) -> None:
+    def __init__(self, field_names_table: list, name_method: str, color: str, initial_data: list) -> None:
         self._field_names_table = field_names_table
         self._name_method: str = name_method
+        self._color: str = color
         self._initial_data: list = initial_data
         self._find_solution_x: float = 0.0
         self._find_solution_y: float = 0.0
+        self._is_calc: bool = False
 
     @property
     def name_method(self) -> str:
         return self._name_method
+
+    @property
+    def color(self) -> str:
+        return self._color
+
+    @property
+    def is_calc(self) -> bool:
+        return self._is_calc
 
     @abstractmethod
     def calc_error(self) -> float:
@@ -104,7 +114,7 @@ class LangrangeMethod(SolutionMethod):
     Класс для интерполяции при помощи многочлена Лагранжа
     """
     def __init__(self, initial_data: list) -> None:
-        super().__init__(['i', 'li(x)', 'yi', 'li(x)*yi'], 'многочлен Лагранжа', initial_data)
+        super().__init__(['i', 'li(x)', 'yi', 'li(x)*yi'], 'многочлен Лагранжа', 'blue', initial_data)
 
     def calc_error(self) -> float:
         f_max: float = max(self._initial_data[1])
@@ -140,6 +150,7 @@ class LangrangeMethod(SolutionMethod):
             i += 1
         self._find_solution_x: float = x
         self._find_solution_y: float = l_n
+        self._is_calc: bool = True
         return table
 
 
@@ -148,7 +159,7 @@ class GaussMethod(SolutionMethod):
     Класс для интерполяции при помощи многочлена Гаусса
     """
     def __init__(self, initial_data: list) -> None:
-        super().__init__(['i', 'li(x)', 'yi', 'li(x)*yi'], 'многочлен Гаусса', initial_data)
+        super().__init__(['i', 'li(x)', 'yi', 'li(x)*yi'], 'многочлен Гаусса', 'green', initial_data)
 
     def calc_error(self) -> float:
         return 1.0
@@ -166,15 +177,22 @@ def draw(methods: iter, initial_data: list) -> None:
     plt.ylabel(r'$y$', fontsize=14)
     plt.title(r'Графики полученных функций')
     x_values = numpy.arange(initial_data[0][0] - 0.2, initial_data[0][-1] + 0.2, 0.01)
+    c: int = 0
     for method in methods:
+        if not method.is_calc:
+            continue
         y_values = [method.calc(x_iter) for x_iter in x_values]
         try:
-            plt.plot(x_values, y_values, linestyle='--', label=f"{method.name_method}")
+            plt.plot(x_values, y_values, linestyle='--',
+                     color=f"{method.color}", label=f"{method.name_method}")
         except TypeError:
             x_values_error = numpy.arange(initial_data[0][0], initial_data[0][-1], 0.01)
             y_values_error = [method.calc(x_iter) for x_iter in x_values_error]
-            plt.plot(x_values_error, y_values_error, linestyle='--', label=f"{method.name_method}")
-    plt.legend(loc='upper left')
+            plt.plot(x_values_error, y_values_error, linestyle='--',
+                     color=f"{method.color}", label=f"{method.name_method}")
+        c += 1
+    if c > 0:
+        plt.legend(loc='upper left')
     x_values = []
     y_values = []
     for x, y in zip(initial_data[0], initial_data[1]):
@@ -200,6 +218,8 @@ def main():
     x_value: float = float(input("Введите значение x, для которого нужно вычислить приближённое значение функции\n"))
     for solution_method in solution_methods:
         print(solution_method.calc_with_output_result(x_value))
+        if not solution_method.is_calc:
+            continue
         print(solution_method.print_result())
     draw(solution_methods, initial_data)
 
