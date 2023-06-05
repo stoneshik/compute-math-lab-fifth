@@ -42,6 +42,10 @@ class SolutionMethod(ABC):
         return self._name_method
 
     @abstractmethod
+    def calc_error(self) -> float:
+        pass
+
+    @abstractmethod
     def calc(self, x: float) -> float:
         pass
 
@@ -50,7 +54,7 @@ class SolutionMethod(ABC):
         pass
 
     def print_result(self) -> str:
-        return f"Для x={self._find_solution_x} было вычисленно значение y={self._find_solution_y}"
+        return f"Для x={self._find_solution_x} было вычисленно значение y={self._find_solution_y}\nПогрешность R={self.calc_error()}"
 
 
 class LangrangeMethod(SolutionMethod):
@@ -59,6 +63,12 @@ class LangrangeMethod(SolutionMethod):
     """
     def __init__(self, initial_data: list) -> None:
         super().__init__(['i', 'li(x)', 'yi', 'li(x)*yi'], 'многочлен Лагранжа', initial_data)
+
+    def calc_error(self) -> float:
+        f_max: float = max(self._initial_data[1])
+        n: int = len(self._initial_data[0])
+        x: float = self._find_solution_x
+        return f_max / math.factorial(n + 1) * abs(sum((x - x_i for x_i in self._initial_data[0])))
 
     def calc(self, x: float) -> float:
         l_n: float = 0.0
