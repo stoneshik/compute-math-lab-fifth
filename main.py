@@ -5,24 +5,8 @@ import numpy
 import matplotlib
 import matplotlib.pyplot as plt
 from prettytable import PrettyTable
-from sympy import diff, latex, exp, Symbol, ln
 
 from manager_io import InputManager
-
-
-class Equation:
-    """
-    Класс обертка для функций
-    """
-
-    def __init__(self, equation_func) -> None:
-        self.equation_func = equation_func
-
-    def get_string(self) -> str:
-        return latex(self.equation_func)
-
-    def get_diff(self):
-        return diff(self.equation_func)
 
 
 class TableEndDifference:
