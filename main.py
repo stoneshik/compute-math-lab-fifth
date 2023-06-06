@@ -44,7 +44,7 @@ class TableEndDifference:
         self._x_values: list = self._initial_data[0][self._x_zero_index - n_table:self._x_zero_index + n_table + 1]
         y_values: list = self._initial_data[1][self._x_zero_index - n_table:self._x_zero_index + n_table + 1]
         table: list = [y_values]
-        for i in range(n_table * 2):
+        for i in range(n_table):
             table.append([y_i_plus_1 - y_i for y_i, y_i_plus_1 in zip(table[i][:-1], table[i][1:])])
         return table
 
@@ -62,11 +62,8 @@ class TableEndDifference:
             field_names.extend([f"Δ^{i}yi" for i in range(2, n)])
             table.field_names = field_names
         for i, x_i in enumerate(self._x_values):
-            if n - i > 1:
-                row: list = [f"{i - int(n / 2)}", str(x_i), str(self._table[0][i]), f"{self._table[1][i]}"]
-            else:
-                row: list = [f"{i - int(n / 2)}", str(x_i), str(self._table[0][i]), '-']
-            row.extend([f"{self._table[j][i]}" if j < n - i else '-' for j in range(2, n)])
+            row: list = [f"{i - int(n / 2)}", str(x_i), str(self._table[0][i])]
+            row.extend([f"{self._table[j][i]}" if i < len(self._table[j]) else '-' for j in range(1, n)])
             table.add_row(row)
         return table
 
