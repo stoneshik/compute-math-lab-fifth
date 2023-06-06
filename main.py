@@ -17,9 +17,9 @@ class TableEndDifference:
     def __init__(self, initial_data: list, x: float) -> None:
         self._initial_data: list = initial_data
         self._x: float = x
+        self._x_values: list = []
         self._x_zero_index: int = self._find_x_zero_index(x)
         self._table: list = self._create_table()
-        self._x_values: list = []
 
     @property
     def table(self) -> list:
@@ -41,9 +41,8 @@ class TableEndDifference:
             n_table: int = int(n_all / 2)
         else:
             n_table: int = n_all - self._x_zero_index
-        x_values: list = self._initial_data[0][self._x_zero_index - n_table:self._x_zero_index + n_table]
-        y_values: list = self._initial_data[1][self._x_zero_index - n_table:self._x_zero_index + n_table]
-        self._x_values = x_values
+        self._x_values: list = self._initial_data[0][self._x_zero_index - n_table:self._x_zero_index + n_table + 1]
+        y_values: list = self._initial_data[1][self._x_zero_index - n_table:self._x_zero_index + n_table + 1]
         table: list = [y_values]
         for i in range(n_table * 2 - 1):
             table.append([y_i_plus_1 - y_i for y_i, y_i_plus_1 in zip(table[i][:-1], table[i][1:])])
@@ -51,23 +50,23 @@ class TableEndDifference:
 
     def print_table(self) -> (PrettyTable, None):
         table: PrettyTable = PrettyTable()
-        n: int = len(self._initial_data[0])
+        n: int = len(self._table)
         if n < 1:
             return None
         elif n == 1:
             table.field_names = ['i', 'xi', 'yi']
-            table.add_row(['0', str(self._initial_data[0][0]), str(self._initial_data[1][0])])
+            table.add_row(['0', str(self._x_values[0]), str(self._table[0][0])])
             return table
         else:
             field_names: list = ['i', 'xi', 'yi', 'Δyi']
             field_names.extend([f"Δ^{i}yi" for i in range(2, n)])
             table.field_names = field_names
-        for i, x_i in enumerate(self._initial_data[0]):
+        for i, x_i in enumerate(self._x_values):
             if n - i > 1:
-                row: list = [i, str(x_i), str(self._table[0][i]), f"Δy{i}={self._table[1][i]}"]
+                row: list = [f"{i - int(n / 2)}", str(x_i), str(self._table[0][i]), f"{self._table[1][i]}"]
             else:
-                row: list = [i, str(x_i), str(self._table[0][i]), '-']
-            row.extend([f"Δ^{j}y{i}={self._table[j][i]}" if j < n - i else '-' for j in range(2, n)])
+                row: list = [f"{i - int(n / 2)}", str(x_i), str(self._table[0][i]), '-']
+            row.extend([f"{self._table[j][i]}" if j < n - i else '-' for j in range(2, n)])
             table.add_row(row)
         return table
 
@@ -154,6 +153,7 @@ class LangrangeMethod(SolutionMethod):
         l_n: float = 0.0
         n: int = len(self._initial_data[0])
         table_end_difference: TableEndDifference = TableEndDifference(self._initial_data, x)
+        print(table_end_difference.print_table())
         for i, x_i, y_i in zip(range(n), self._initial_data[0], self._initial_data[1]):
             l_n_iter: float = 1.0
             for j, x_j in enumerate(self._initial_data[0]):
