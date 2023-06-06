@@ -25,6 +25,10 @@ class TableEndDifference:
     def table(self) -> list:
         return self._table
 
+    @property
+    def x_values(self) -> list:
+        return self._x_values
+
     def _find_x_zero_index(self, x: float) -> int:
         x_last: float = self._initial_data[0][0]
         for i, x_iter in enumerate(self._initial_data[0]):
@@ -111,7 +115,7 @@ class SolutionMethod(ABC):
             return False
         h: float = self._initial_data[0][1] - self._initial_data[0][0]
         for x_i, x_i_plus in zip(self._initial_data[0][1:-1], self._initial_data[0][2:]):
-            if x_i_plus - x_i != h:
+            if abs(x_i_plus - x_i - h) > 0.000001:
                 return False
         return True
 
@@ -179,7 +183,31 @@ class GaussMethod(SolutionMethod):
     def calc(self, x: float) -> (float, None):
         if not self._check_equidistant_nodes():
             return None
-        pass
+        table_end_difference: TableEndDifference = TableEndDifference(self._initial_data, x)
+        n: int = len(table_end_difference.table)
+        if n == 1:
+            return table_end_difference.table[0][int(n / 2)]
+        h: float = table_end_difference.x_values[1] - table_end_difference.x_values[0]
+        x_zero: float = table_end_difference.x_values[int(n / 2)]
+        t: float = (x - x_zero) / h
+        top_part: float = t
+        if x > x_zero:
+            p_x: float = table_end_difference.table[0][int(n / 2)] + t * table_end_difference.table[1][int(n / 2)]
+            for i in range(2, n):
+                if i % 2 == 0:
+                    top_part *= (t - int(i / 2))
+                else:
+                    top_part *= (t + int(i / 2))
+                p_x += top_part / math.factorial(i) * table_end_difference.table[i][int(n / 2) - int(i / 2)]
+        else:
+            p_x: float = table_end_difference.table[0][int(n / 2)] + t * table_end_difference.table[1][int(n / 2)]
+            for i in range(1, n):
+                if i % 2 == 0:
+                    top_part *= (t + int(i / 2))
+                else:
+                    top_part *= (t - int(i / 2))
+                p_x += top_part / math.factorial(i) * table_end_difference.table[i][int(n / 2) - int((i + 1) / 2)]
+        return p_x
 
     def calc_with_output_result(self, x: float) -> (PrettyTable, None):
         if not self._check_equidistant_nodes():
@@ -187,8 +215,34 @@ class GaussMethod(SolutionMethod):
         table: PrettyTable = PrettyTable()
         table.field_names = self._field_names_table
         table_end_difference: TableEndDifference = TableEndDifference(self._initial_data, x)
-        print(table_end_difference.print_table())
-        return table
+        n: int = len(table_end_difference.table)
+        if n == 1:
+            self._find_solution_y: float = table_end_difference.table[0][int(n / 2)]
+            self._is_calc: bool = True
+            return table_end_difference.print_table()
+        h: float = table_end_difference.x_values[1] - table_end_difference.x_values[0]
+        x_zero: float = table_end_difference.x_values[int(n / 2)]
+        t: float = (x - x_zero) / h
+        top_part: float = t
+        if x > x_zero:
+            p_x: float = table_end_difference.table[0][int(n / 2)] + t * table_end_difference.table[1][int(n / 2)]
+            for i in range(2, n):
+                if i % 2 == 0:
+                    top_part *= (t - int(i / 2))
+                else:
+                    top_part *= (t + int(i / 2))
+                p_x += top_part / math.factorial(i) * table_end_difference.table[i][int(n / 2) - int(i / 2)]
+        else:
+            p_x: float = table_end_difference.table[0][int(n / 2)] + t * table_end_difference.table[1][int(n / 2)]
+            for i in range(1, n):
+                if i % 2 == 0:
+                    top_part *= (t + int(i / 2))
+                else:
+                    top_part *= (t - int(i / 2))
+                p_x += top_part / math.factorial(i) * table_end_difference.table[i][int(n / 2) - int((i + 1) / 2)]
+        self._find_solution_y: float = p_x
+        self._is_calc: bool = True
+        return table_end_difference.print_table()
 
 
 def draw(methods: iter, initial_data: list, input_manager: InputManager) -> None:
@@ -234,7 +288,7 @@ def main():
         return
     solution_methods = (
         LangrangeMethod(initial_data),
-        #GaussMethod(initial_data)
+        GaussMethod(initial_data)
     )
     x_value: float = float(input("Введите значение x, для которого нужно вычислить приближённое значение функции\n"))
     if not initial_data[0][0] <= x_value <= initial_data[0][-1]:
