@@ -178,7 +178,20 @@ class GaussMethod(SolutionMethod):
         super().__init__(['i', 'li(x)', 'yi', 'li(x)*yi'], 'многочлен Гаусса', 'green', initial_data)
 
     def calc_error(self) -> float:
-        return 1.0
+        table_end_difference: TableEndDifference = TableEndDifference(self._initial_data, self._find_solution_x)
+        n: int = int(len(table_end_difference.table) / 2)
+        h: float = table_end_difference.x_values[1] - table_end_difference.x_values[0]
+        x_zero: float = table_end_difference.x_values[int(n / 2)]
+        t: float = (self._find_solution_x - x_zero) / h
+        y_zero: float = table_end_difference.table[0][n]
+        for y_values in table_end_difference.table:
+            if len(y_values) <= n:
+                break
+            y_zero: float = y_values[n]
+        second_part: float = t
+        for i in range(n + 1):
+            second_part *= (t - i)
+        return y_zero / math.factorial(n + 1) * second_part
 
     def calc(self, x: float) -> (float, None):
         if not self._check_equidistant_nodes():
