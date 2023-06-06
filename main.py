@@ -44,7 +44,7 @@ class TableEndDifference:
         self._x_values: list = self._initial_data[0][self._x_zero_index - n_table:self._x_zero_index + n_table + 1]
         y_values: list = self._initial_data[1][self._x_zero_index - n_table:self._x_zero_index + n_table + 1]
         table: list = [y_values]
-        for i in range(n_table * 2 - 1):
+        for i in range(n_table * 2):
             table.append([y_i_plus_1 - y_i for y_i, y_i_plus_1 in zip(table[i][:-1], table[i][1:])])
         return table
 
