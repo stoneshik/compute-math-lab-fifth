@@ -14,18 +14,38 @@ class TableEndDifference:
     """
     Таблица конечных разностей
     """
-    def __init__(self, initial_data: list) -> None:
+    def __init__(self, initial_data: list, x: float) -> None:
         self._initial_data: list = initial_data
+        self._x: float = x
+        self._x_zero_index: int = self._find_x_zero_index(x)
         self._table: list = self._create_table()
+        self._x_values: list = []
 
     @property
     def table(self) -> list:
         return self._table
 
+    def _find_x_zero_index(self, x: float) -> int:
+        x_last: float = self._initial_data[0][0]
+        for i, x_iter in enumerate(self._initial_data[0]):
+            if abs(x_iter - x) > abs(x_last - x):
+                return i - 1
+            x_last = x_iter
+        return len(self._initial_data[0]) - 1
+
     def _create_table(self) -> list:
-        table: list = [self._initial_data[1]]
-        n: int = len(self._initial_data[1])
-        for i in range(n - 1):
+        n_all: int = len(self._initial_data[1]) - 1
+        if self._x_zero_index < n_all / 2:
+            n_table: int = self._x_zero_index
+        elif self._x_zero_index == n_all / 2:
+            n_table: int = int(n_all / 2)
+        else:
+            n_table: int = n_all - self._x_zero_index
+        x_values: list = self._initial_data[0][self._x_zero_index - n_table:self._x_zero_index + n_table]
+        y_values: list = self._initial_data[1][self._x_zero_index - n_table:self._x_zero_index + n_table]
+        self._x_values = x_values
+        table: list = [y_values]
+        for i in range(n_table * 2 - 1):
             table.append([y_i_plus_1 - y_i for y_i, y_i_plus_1 in zip(table[i][:-1], table[i][1:])])
         return table
 
@@ -133,6 +153,7 @@ class LangrangeMethod(SolutionMethod):
         table.field_names = self._field_names_table
         l_n: float = 0.0
         n: int = len(self._initial_data[0])
+        table_end_difference: TableEndDifference = TableEndDifference(self._initial_data, x)
         for i, x_i, y_i in zip(range(n), self._initial_data[0], self._initial_data[1]):
             l_n_iter: float = 1.0
             for j, x_j in enumerate(self._initial_data[0]):
@@ -155,13 +176,6 @@ class GaussMethod(SolutionMethod):
     def __init__(self, initial_data: list) -> None:
         super().__init__(['i', 'li(x)', 'yi', 'li(x)*yi'], 'многочлен Гаусса', 'green', initial_data)
 
-    def _find_x_zero_index(self, x: float) -> int:
-        x_last: float = self._initial_data[0][0]
-        for i, x_iter in enumerate(self._initial_data[0][1:]):
-            if abs(x_iter - x) > abs(x_last - x):
-                return i - 1
-        return 0
-
     def calc_error(self) -> float:
         return 1.0
 
@@ -175,7 +189,7 @@ class GaussMethod(SolutionMethod):
             return None
         table: PrettyTable = PrettyTable()
         table.field_names = self._field_names_table
-        x_zero_index: int = self._find_x_zero_index(x)
+        table_end_difference: TableEndDifference = TableEndDifference(self._initial_data, x)
         return table
 
 
@@ -224,10 +238,10 @@ def main():
         LangrangeMethod(initial_data),
         #GaussMethod(initial_data)
     )
-    table_end_difference: TableEndDifference = TableEndDifference(initial_data)
-    if table_end_difference is None:
-        return
-    print(table_end_difference.print_table())
+    #table_end_difference: TableEndDifference = TableEndDifference(initial_data)
+    #if table_end_difference is None:
+    #    return
+    #print(table_end_difference.print_table())
     x_value: float = float(input("Введите значение x, для которого нужно вычислить приближённое значение функции\n"))
     if not initial_data[0][0] <= x_value <= initial_data[0][-1]:
         print("Значение x не попадает в заданный интервал")
