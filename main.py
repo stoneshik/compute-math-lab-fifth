@@ -200,7 +200,7 @@ class GaussMethod(SolutionMethod):
                     top_part *= (t + int(i / 2))
                 p_x += top_part / math.factorial(i) * table_end_difference.table[i][int(n / 2) - int(i / 2)]
         else:
-            p_x: float = table_end_difference.table[0][int(n / 2)] + t * table_end_difference.table[1][int(n / 2)]
+            p_x: float = table_end_difference.table[0][int(n / 2)] + t * table_end_difference.table[1][int(n / 2) - 1]
             for i in range(2, n):
                 if i % 2 == 0:
                     top_part *= (t + int(i / 2))
@@ -217,6 +217,7 @@ class GaussMethod(SolutionMethod):
         table_end_difference: TableEndDifference = TableEndDifference(self._initial_data, x)
         n: int = len(table_end_difference.table)
         if n == 1:
+            self._find_solution_x: float = x
             self._find_solution_y: float = table_end_difference.table[0][int(n / 2)]
             self._is_calc: bool = True
             return table_end_difference.print_table()
@@ -233,13 +234,14 @@ class GaussMethod(SolutionMethod):
                     top_part *= (t + int(i / 2))
                 p_x += top_part / math.factorial(i) * table_end_difference.table[i][int(n / 2) - int(i / 2)]
         else:
-            p_x: float = table_end_difference.table[0][int(n / 2)] + t * table_end_difference.table[1][int(n / 2)]
+            p_x: float = table_end_difference.table[0][int(n / 2)] + t * table_end_difference.table[1][int(n / 2) - 1]
             for i in range(2, n):
                 if i % 2 == 0:
                     top_part *= (t + int(i / 2))
                 else:
                     top_part *= (t - int(i / 2))
                 p_x += top_part / math.factorial(i) * table_end_difference.table[i][int(n / 2) - int((i + 1) / 2)]
+        self._find_solution_x: float = x
         self._find_solution_y: float = p_x
         self._is_calc: bool = True
         return table_end_difference.print_table()
