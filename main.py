@@ -44,7 +44,7 @@ class TableEndDifference:
         self._x_values: list = self._initial_data[0][self._x_zero_index - n_table:self._x_zero_index + n_table + 1]
         y_values: list = self._initial_data[1][self._x_zero_index - n_table:self._x_zero_index + n_table + 1]
         table: list = [y_values]
-        for i in range(n_table):
+        for i in range(n_table * 2):
             table.append([y_i_plus_1 - y_i for y_i, y_i_plus_1 in zip(table[i][:-1], table[i][1:])])
         return table
 
@@ -187,6 +187,7 @@ class GaussMethod(SolutionMethod):
         table: PrettyTable = PrettyTable()
         table.field_names = self._field_names_table
         table_end_difference: TableEndDifference = TableEndDifference(self._initial_data, x)
+        print(table_end_difference.print_table())
         return table
 
 
@@ -235,10 +236,6 @@ def main():
         LangrangeMethod(initial_data),
         #GaussMethod(initial_data)
     )
-    #table_end_difference: TableEndDifference = TableEndDifference(initial_data)
-    #if table_end_difference is None:
-    #    return
-    #print(table_end_difference.print_table())
     x_value: float = float(input("Введите значение x, для которого нужно вычислить приближённое значение функции\n"))
     if not initial_data[0][0] <= x_value <= initial_data[0][-1]:
         print("Значение x не попадает в заданный интервал")
