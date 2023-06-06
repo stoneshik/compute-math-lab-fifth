@@ -155,6 +155,13 @@ class GaussMethod(SolutionMethod):
     def __init__(self, initial_data: list) -> None:
         super().__init__(['i', 'li(x)', 'yi', 'li(x)*yi'], 'многочлен Гаусса', 'green', initial_data)
 
+    def _find_x_zero_index(self, x: float) -> int:
+        x_last: float = self._initial_data[0][0]
+        for i, x_iter in enumerate(self._initial_data[0][1:]):
+            if abs(x_iter - x) > abs(x_last - x):
+                return i - 1
+        return 0
+
     def calc_error(self) -> float:
         return 1.0
 
@@ -168,6 +175,7 @@ class GaussMethod(SolutionMethod):
             return None
         table: PrettyTable = PrettyTable()
         table.field_names = self._field_names_table
+        x_zero_index: int = self._find_x_zero_index(x)
         return table
 
 
