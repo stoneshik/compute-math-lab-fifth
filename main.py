@@ -76,7 +76,6 @@ class SolutionMethod(ABC):
     """
     Базовый абстрактный класс для классов реализаций интерполяции
     """
-
     def __init__(self, field_names_table: list, name_method: str, color: str, initial_data: list) -> None:
         self._field_names_table = field_names_table
         self._name_method: str = name_method
@@ -153,8 +152,6 @@ class LangrangeMethod(SolutionMethod):
         table.field_names = self._field_names_table
         l_n: float = 0.0
         n: int = len(self._initial_data[0])
-        table_end_difference: TableEndDifference = TableEndDifference(self._initial_data, x)
-        print(table_end_difference.print_table())
         for i, x_i, y_i in zip(range(n), self._initial_data[0], self._initial_data[1]):
             l_n_iter: float = 1.0
             for j, x_j in enumerate(self._initial_data[0]):
